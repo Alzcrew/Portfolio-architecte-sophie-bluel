@@ -32,22 +32,34 @@ fetchWorks()
 /******** Functions for the display of filters and the home page gallery **********/
 
 // Function to display filters 
-function displayFilters(dataWork){
-const filters = document.getElementById("filters");
+function displayFilters() {
+  const filters = document.getElementById("filters");
 
-// Add the "All" filter as the first item in the list of filters
-filters.innerHTML += `<li class="filter" id="0">Tous</li>`;
+  fetch('http://localhost:5678/api/categories')
+    .then(response => response.json())
+    .then(data => {
+      filters.innerHTML += `<li class="filter" id="0">Tous</li>`;
 
-// Create a list of categories by sorting the categories of the different jobs retrieved
-const categoryList = Array.from(new Set(dataWork.map(jsonWork => jsonWork.categoryId )));
+      data.forEach(category => {
+        filters.innerHTML += `<li class="filter" id="${category.id}">${category.name}</li>`;
+      });
 
-/* find() finds the first element in the dataWork array
- which has the same categoryId as the current categoryId.*/
-categoryList.forEach(categoryId => {      
-    const categoryName = dataWork.find(work => work.categoryId === categoryId).category.name;                 
-    filters. innerHTML += `<li class="filter" id="${categoryId}">${categoryName}</li>`;
-});
+      const buttonFilters = document.querySelectorAll(".filter");
+      const filterAll = buttonFilters[0];
 
+      filterAll.addEventListener("click", showAllWorks);
+
+      buttonFilters.forEach(buttonFilter => {
+        if (buttonFilter !== filterAll) {
+          buttonFilter.addEventListener("click", event => {
+            filterWorks(event);
+          });
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Une erreur s\'est produite lors de la récupération des catégories :', error);
+    });
 }
 
 // Function to display the gallery of the homepage or the modal
